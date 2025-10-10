@@ -1,0 +1,17 @@
+spring:
+  profiles:
+    active: dev
+server:
+  port: 8080
+
+data:
+  service:
+    url: http://localhost:8081
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 3000
+        readTimeout: 5000
+        loggerLevel: basic
