@@ -1,3 +1,5 @@
+# Alumno: Emiliano Coratolo
+
 # 🚀 Trabajo Práctico: Sistema de Microservicios con Spring Boot y Feign
 
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.0-green)
@@ -1190,3 +1192,157 @@ Cada archivo debe seguir este formato:
 ## 📝 Licencia
 
 Este trabajo es parte del curso de Programación II de Ingeniería en Informática. Uso educativo únicamente.
+
+
+
+---
+
+# 📚 Documentación del Proyecto 
+
+Esta sección complementa el README original con detalles prácticos para ejecutar los microservicios, consumir los endpoints y trabajar con distintos perfiles de base de datos.
+
+## 🧩 Arquitectura general
+
+El proyecto está compuesto por dos microservicios:
+- dataService: expone endpoints CRUD y consultas sobre productos, categorías e inventario. Persiste en BD (H2 en dev, MySQL/PostgreSQL para otros perfiles).
+- businessService: expone endpoints orientados a reglas de negocio y reportes, y se comunica con dataService vía Feign.
+
+Comunicación:
+- businessService -> (Feign) -> dataService
+
+## 🔌 Puertos y profiles
+
+Por defecto ambos módulos tienen configurado server.port: 8081 en el profile dev. Para correrlos a la vez, se recomienda:
+- dataService: 8080 (override del puerto por argumento)
+- businessService: 8081 (por defecto) o 8082
+
+Profiles soportados en ambos servicios:
+- dev: H2 en memoria (recomendado para desarrollo local)
+- mysql: apunta a un contenedor MySQL (ver docker-compose.yml)
+- postgres: apunta a un contenedor PostgreSQL (ver docker-compose.yml)
+
+## ✅ Requisitos previos
+- JDK 21
+- Maven 3.9+
+- Docker 25+ (solo si vas a usar MySQL o PostgreSQL con docker-compose)
+
+## ▶️ Ejecución local (profile dev con H2)
+
+1) Levantar dataService en 8080 (recomendado)
+- Linux/Mac:
+  - cd dataService
+  - ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.arguments=--server.port=8080
+- Windows (CMD):
+  - cd dataService
+  - mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.arguments=--server.port=8080
+
+H2 Console: http://localhost:8080/h2-console (Driver: org.h2.Driver, JDBC: jdbc:h2:mem:testdb)
+
+2) Levantar businessService apuntando al dataService
+- Linux/Mac:
+  - cd businessService
+  - ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.arguments="--server.port=8081 --data.service.url=http://localhost:8080"
+- Windows (CMD):
+  - cd businessService
+  - mvnw.cmd spring-boot:run -Dspring-boot.run.profiles=dev -Dspring-boot.run.arguments="--server.port=8081 --data.service.url=http://localhost:8080"
+
+Nota: Puedes cambiar el puerto del businessService a 8082 si 8081 está ocupado.
+
+## 🐳 Ejecución con Docker Compose (MySQL/PostgreSQL)
+
+El archivo docker-compose.yml incluye MySQL y PostgreSQL. Ejecuta uno u otro según el profile que uses.
+
+- Levantar MySQL:
+  - docker compose up -d mysql
+  - Luego ejecuta cada servicio con el profile mysql:
+    - dataService: -Dspring-boot.run.profiles=mysql (puerto por defecto 8081, puedes override con --server.port=8080)
+    - businessService: -Dspring-boot.run.profiles=mysql --data.service.url=http://localhost:8080
+
+- Levantar PostgreSQL:
+  - docker compose up -d postgres
+  - Luego ejecuta cada servicio con el profile postgres:
+    - dataService: -Dspring-boot.run.profiles=postgres (puerto por defecto 8081, puedes override con --server.port=8080)
+    - businessService: -Dspring-boot.run.profiles=postgres --data.service.url=http://localhost:8080
+
+Credenciales y URLs están preconfiguradas en los application.yml/yaml.
+
+## 🔑 Propiedades importantes
+- data.service.url: URL base del dataService que utilizará businessService (ej.: http://localhost:8080)
+- server.port: Puerto del servicio (override en tiempo de ejecución con --server.port=XXXX)
+
+## 📡 Endpoints
+
+A) dataService (base: /data)
+- GET /data/productos: Lista todos los productos
+- GET /data/productos/{id}: Obtiene producto por id
+- POST /data/productos: Crea un producto
+- PUT /data/productos/{id}: Actualiza un producto existente
+- DELETE /data/productos/{id}: Elimina un producto
+- GET /data/productos/categoria/{nombre}: Lista por categoría
+- GET /data/categorias: Lista categorías
+- POST /data/categorias: Crea categoría
+- GET /data/inventario/stock-bajo: Productos con stock bajo
+- PUT /data/inventario/{inventarioId}/stock?cantidad=NN: Actualiza stock
+
+Ejemplo JSON para crear producto (dataService):
+{
+  "nombre": "Mouse",
+  "descripcion": "Mouse óptico",
+  "precio": 1999.99,
+  "categoria": { "id": 1 },
+  "inventario": { "cantidad": 10, "stockMinimo": 3 }
+}
+
+B) businessService (base: /api)
+- GET /api/productos: Lista de productos (DTO)
+- GET /api/productos/{id}: Obtiene un producto (DTO)
+- POST /api/productos: Crea un producto con validaciones de negocio
+- GET /api/productos/categoria/{nombre}: Lista por categoría
+- GET /api/reportes/stock-bajo: Productos con stock bajo
+- GET /api/reportes/valor-inventario: Suma precio x cantidad
+
+Ejemplo JSON para crear (businessService):
+{
+  "nombre": "Mouse",
+  "descripcion": "Mouse óptico",
+  "precio": 1999.99,
+  "categoriaId": 1,
+  "stock": 10,
+  "stockMinimo": 3
+}
+
+Notas:
+- businessService depende de que dataService esté disponible y correctamente configurado en data.service.url.
+- Validaciones de negocio en businessService: precio > 0, stock >= 0, etc.
+
+## 🧪 Tests
+- dataService: cd dataService && ./mvnw test (Windows: cd dataService && mvnw.cmd test)
+- businessService: cd businessService && ./mvnw test (Windows: cd businessService && mvnw.cmd test)
+- Construir sin correr tests: ./mvnw -DskipTests package (ejecutar dentro de cada módulo)
+
+Hay un test de integración en dataService para crear y consultar un producto, y tests unitarios en businessService para la lógica de mapeo/negocio.
+
+## 🔍 Troubleshooting
+- Puerto en uso: cambia el puerto con --server.port=XXXX en tiempo de ejecución.
+- Feign/MicroserviceCommunicationException: verifica que dataService esté levantado y data.service.url apunte al host/puerto correctos.
+- H2 Console: http://localhost:{puerto}/h2-console (profile dev)
+- MySQL/PostgreSQL: asegúrate de que los contenedores estén healthy (docker ps) y las credenciales coincidan con application.yml/yaml.
+
+## 🧭 Flujo sugerido de prueba rápida
+1) dataService en 8080 (dev)
+2) Crear una categoría base en dataService (requerido para crear productos desde businessService):
+   - POST http://localhost:8080/data/categorias
+   - Body:
+```
+{
+  "nombre": "General",
+  "descripcion": "Default"
+}
+```
+   - Guarda el id devuelto (por ejemplo, 1).
+3) businessService en 8081 con --data.service.url=http://localhost:8080
+4) POST /api/productos (businessService) con el JSON de ejemplo, usando el categoriaId creado (p. ej. 1)
+5) GET /api/reportes/valor-inventario
+6) GET /api/reportes/stock-bajo
+
+Con esto verificas creación, mapeo DTO, comunicación vía Feign y cálculos de negocio.
