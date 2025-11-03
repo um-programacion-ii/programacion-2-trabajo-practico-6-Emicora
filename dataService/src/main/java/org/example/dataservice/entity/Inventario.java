@@ -1,5 +1,6 @@
 package org.example.dataservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -14,6 +15,7 @@ public class Inventario {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", unique = true)
+    @JsonIgnoreProperties({"inventario", "categoria", "productos"})
     private Producto producto;
 
     @Min(0) @Column(nullable = false) private Integer cantidad;

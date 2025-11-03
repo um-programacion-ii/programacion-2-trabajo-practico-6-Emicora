@@ -16,11 +16,15 @@ public class ProductoService {
 
     public ProductoService(ProductoRepository p, CategoriaRepository c){ this.productoRepo=p; this.categoriaRepo=c; }
 
-    @Transactional(readOnly = true) public List<Producto> obtenerTodos(){ return productoRepo.findAll(); }
+    @Transactional(readOnly = true) 
+    public List<Producto> obtenerTodos(){ 
+        return productoRepo.findAll();
+    }
 
     @Transactional(readOnly = true)
     public Producto buscarPorId(Long id){
-        return productoRepo.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Producto "+id+" no existe"));
+        return productoRepo.findById(id)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Producto "+id+" no existe"));
     }
 
     public Producto guardar(Producto p){
