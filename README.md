@@ -1,4 +1,3 @@
-# Alumno: Emiliano Coratolo
 
 # 🚀 Trabajo Práctico: Sistema de Microservicios con Spring Boot y Feign
 
@@ -111,8 +110,8 @@ Desarrollar un sistema de microservicios utilizando Spring Boot y Feign, impleme
 > 💡 **Nota**: Esta estimación considera la complejidad de configurar microservicios, comunicación entre servicios con Feign, múltiples bases de datos y Docker. El tiempo incluye el aprendizaje de conceptos de microservicios y Spring Cloud.
 
 ## 👨‍🎓 Información del Alumno
-- **Nombre y Apellido**: [Nombre y Apellido del Alumno]
-- **Legajo**: [Número de Legajo]
+- **Nombre y Apellido**: Emiliano Coratolo
+- **Legajo**: 62085
 
 > ⚠️ **IMPORTANTE**: Este trabajo práctico se realiza **INDIVIDUALMENTE**. Aunque se utilizan herramientas de colaboración como Pull Requests y Code Review, estas son para mantener buenas prácticas de desarrollo y un historial ordenado. Todo el desarrollo debe ser realizado por el mismo estudiante.
 

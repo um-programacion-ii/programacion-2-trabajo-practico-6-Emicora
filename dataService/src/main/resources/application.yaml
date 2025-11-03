@@ -7,6 +7,9 @@ spring:
   config:
     activate:
       on-profile: dev
+  docker:
+    compose:
+      enabled: false
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL
     driver-class-name: org.h2.Driver
